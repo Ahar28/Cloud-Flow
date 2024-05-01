@@ -1,0 +1,52 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ahar-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app1-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app1-deployment
+  template:
+    metadata:
+      labels:
+        app: app1-deployment
+    spec:
+      containers:
+        - name: app1-deployment
+          image: us-east1-docker.pkg.dev/cloud-402400/k8repo1/app1image
+          ports:
+            - containerPort: 6000
+          volumeMounts:
+            - name: storage-volume
+              mountPath: /Ahar_PV_dir
+      volumes:
+        - name: storage-volume
+          persistentVolumeClaim:
+            claimName: ahar-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app1-deployment-service
+spec:
+  selector:
+    app: app1-deployment
+  type: LoadBalancer
+  ports:
+    - protocol: TCP
+      port: 6000
+      targetPort: 6000

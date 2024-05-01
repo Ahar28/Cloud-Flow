@@ -1,0 +1,27 @@
+steps:
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      [
+        "build",
+        "-t",
+        "us-east1-docker.pkg.dev/cloud-402400/k8repo1/app1image:$COMMIT_SHA",
+        ".",
+      ]
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      [
+        "push",
+        "us-east1-docker.pkg.dev/cloud-402400/k8repo1/app1image:$COMMIT_SHA",
+      ]
+  - name: "gcr.io/cloud-builders/gke-deploy"
+    id: Deployment
+    args:
+      [
+        "run",
+        "--filename=deployment.yaml",
+        "--image=us-east1-docker.pkg.dev/cloud-402400/k8repo1/app1image:$COMMIT_SHA",
+        "--location=us-east1-b",
+        "--cluster=cluster-submission",
+      ]
+images:
+  - "us-east1-docker.pkg.dev/cloud-402400/k8repo1/app1image:$COMMIT_SHA"
